@@ -22,9 +22,6 @@ void setup() {
     pinMode(ledPins[i], OUTPUT);
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
-  pinMode(SPEAKER_PIN, OUTPUT);
-  // The following line primes the random number generator.
-  // It assumes pin A0 is floating (disconnected):
   randomSeed(analogRead(A0));
 }
 
@@ -32,7 +29,7 @@ unsigned long previousTime = 0;
 
 void loop()
 {
-  if(gameOver)
+  if(gameOver) //uusi peli vanhan päättymisen jälkeen
   {
     if(digitalRead(buttonPins[1]) == LOW &&
         digitalRead(buttonPins[2]) == LOW)
@@ -41,7 +38,7 @@ void loop()
     }
   }
 
-  if(!showingSequence && !gameOver)
+  if(!showingSequence && !gameOver) //käskyn odottaminen ensimmäisen pelin aloitukselle
 {
     ledShow1();
 
@@ -134,14 +131,14 @@ void checkGame(byte button)
     }
 }
 
-void initializeGame()
+void initializeGame() //pelin lähtötilanne - lukemat nolla
 {
     score = 0;
     sequenceLength = 1;
     playerIndex = 0;
     gameOver = false;
 
-    for(byte i = 0; i < 100; i++)
+    for(byte i = 0; i < 100; i++) //pelin sekvenssin luominen
     {
         sequence[i] = random(0,4);
     }
