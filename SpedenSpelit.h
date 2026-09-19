@@ -41,7 +41,6 @@ void checkGame(byte);
   function and enables Timer1 interrupts to start
   the Game.
 */
-void startTheGame(void);
 void createSequence(void);
 void startGame(void);
 
