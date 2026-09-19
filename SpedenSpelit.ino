@@ -27,7 +27,15 @@ unsigned long previousTime = 0;
 
 void loop()
 {
-  if(gameOver)
+  if(gameOver) //lähtötilanne vanhan pelin jälkeen, odotetaan pelaajan painallusta
+  {
+    ledShow2();
+    if(digitalRead(buttonPins[0]) == LOW &&
+       digitalRead(buttonPins[3]) == LOW)
+    {
+        startGame();
+    }
+  }
   {
     if(digitalRead(buttonPins[1]) == LOW &&
         digitalRead(buttonPins[2]) == LOW)
