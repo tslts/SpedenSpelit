@@ -8,23 +8,18 @@
 volatile int buttonNumber = -1;           // for buttons interrupt handler
 volatile bool newTimerInterrupt = false;  // for timer interrupt handler
 bool showingSequence = false;
-int showIndex = 0;
 
-byte score;
+
 bool gameOver;
 byte sequence[100];
-byte sequenceLength;
+int gameIndex = 0;
+int score = 0;
 byte playerIndex;
 
 void setup() {
   Serial.begin(9600);
-  for (byte i = 0; i < 4; i++) {
-    pinMode(ledPins[i], OUTPUT);
-    pinMode(buttonPins[i], INPUT_PULLUP);
-  }
-  pinMode(SPEAKER_PIN, OUTPUT);
-  // The following line primes the random number generator.
-  // It assumes pin A0 is floating (disconnected):
+  initializeLeds();
+  initButtonsAndButtonInterrupts();
   randomSeed(analogRead(A0));
 }
 
@@ -37,25 +32,26 @@ void loop()
     if(digitalRead(buttonPins[1]) == LOW &&
         digitalRead(buttonPins[2]) == LOW)
     {
-      startTheGame();
+      startGame();
     }
   }
 
-  if(!showingSequence && !gameOver)
+  if(!showingSequence && !gameOver) //lähtötilanne, odotetaan pelaajan painallusta
 {
     ledShow1();
 
     if(digitalRead(buttonPins[0]) == LOW &&
        digitalRead(buttonPins[3]) == LOW)
     {
-        startTheGame();
-    }
-    else if(buttonNumber >= 0)
-    {
-        checkGame(buttonNumber);
-        buttonNumber = -1;
+        startGame();
     }
 }
+if(buttonNumber >= 0 && showingSequence && !gameOver) //pelaajan painalluksia tarkistetaan vain sekvenssin pyöriessä
+    {
+        checkGame(buttonNumber);
+        buttonNumber = -1; //tyhjennetään painikemuuttuja seuraavalle painallukselle
+    }
+
     // Timerin simulointi R4:llä
     if(millis() - previousTime >= 1000)
     {
@@ -70,21 +66,20 @@ if(newTimerInterrupt)
 
     if(showingSequence)
     {
-        setLed(sequence[showIndex]);
+        setLed(sequence[gameIndex]);
         delay(300);
         clearAllLeds();
 
-        showIndex++;
-
-        if(showIndex >= sequenceLength)
+        gameIndex++;
+        if(gameIndex >= 100)
         {
-            showingSequence = false;
-            showIndex = 0;
-            buttonNumber = -1; //tyhjentää vanhan painalluksen
+            playerIndex = 0;
+            gameIndex = 0;            
         }
     }
 }
 }
+
 
 void initializeTimer(void)
 {
@@ -99,58 +94,54 @@ ISR(TIMER1_COMPA_vect)
   
 }
 
-
-
-void checkGame(byte button)
+void createSequence() //luo satunnaisen sekvenssin
 {
-    if(button == sequence[playerIndex])
-    {
-        playerIndex++;
-
-        if(playerIndex == sequenceLength)
-        {
-            score++;
-            if(sequenceLength < 100)
-            {
-            sequenceLength++;
-            }
-
-            Serial.print("Pisteet: "); //print testaukseen
-            Serial.println(score);
-
-            playerIndex = 0;
-            showingSequence = true;
-            showIndex = 0;
-        }
-    }
-    else
-    {
-        Serial.print("Peli päättyi. Pisteet: ");
-        Serial.println(score);
-        gameOver = true;
-        showingSequence = false; //peliä ei voi jatkaa
-        ledShow2();
-        buttonNumber = -1;
-    }
-}
-
-void initializeGame()
-{
-    score = 0;
-    sequenceLength = 1;
-    playerIndex = 0;
-    gameOver = false;
-
     for(byte i = 0; i < 100; i++)
     {
         sequence[i] = random(0,4);
     }
 }
 
-void startTheGame()
+void startGame()
 {
   initializeGame();
   showingSequence = true;
-  showIndex = 0;
+  gameIndex = 0;
+}
+
+void initializeGame()
+{
+    createSequence();
+    playerIndex = 0;
+    gameIndex = 0;
+    gameOver = false;
+    score = 0;
+    buttonNumber = -1;
+}
+
+void checkGame(byte button)
+{
+    if(playerIndex >= gameIndex){
+        gameOver = true;
+        ledShow2();
+        showingSequence = false; //sekvenssin näyttäminen pysähtyy, peliä ei voi jatkaa
+        return; // pelaaja yritti arvata, peli pääättyy
+    }
+    if(button == sequence[playerIndex])
+    {
+        playerIndex++;
+        score++;
+        Serial.print("Pisteet: "); //print testaukseen
+        Serial.println(score);
+    }
+    else
+    {
+        Serial.print("Peli päättyi. Pisteet: ");
+        Serial.println(score);
+        gameOver = true;
+        showingSequence = false; //sekvenssin näyttäminen pysähtyy, peliä ei voi jatkaa
+        ledShow2();
+        buttonNumber = -1;
+    }
 }
 

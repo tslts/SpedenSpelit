@@ -42,6 +42,7 @@ void checkGame(byte);
   the Game.
 */
 void startTheGame(void);
-
+void createSequence(void);
+void startGame(void);
 
 #endif

@@ -1,5 +1,7 @@
 #include "leds.h"
 
+const byte ledPins[4] = { A2, A3, A4, A5 };
+
 void initializeLeds()
 {
     for(byte i = 0; i < 4; i++)

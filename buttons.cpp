@@ -1,15 +1,14 @@
 #include "buttons.h"
 
 
-
+extern const byte buttonPins[4] = { 2, 3, 4, 5 };
 
 void initButtonsAndButtonInterrupts(void)
 {
-    pinMode(2, INPUT_PULLUP);
-    pinMode(3, INPUT_PULLUP);
-    pinMode(4, INPUT_PULLUP);
-    pinMode(5, INPUT_PULLUP);
-    pinMode(6, INPUT_PULLUP);
+    pinMode(buttonPins[0], INPUT_PULLUP);
+    pinMode(buttonPins[1], INPUT_PULLUP);
+    pinMode(buttonPins[2], INPUT_PULLUP);
+    pinMode(buttonPins[3], INPUT_PULLUP);
     // keskeytysten asetukset
 }
 
