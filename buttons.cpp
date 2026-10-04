@@ -1,29 +1,60 @@
 #include "buttons.h"
 
+// Napeille taulukko.
+uint8_t buttonPins[4] = {2, 3, 4, 5};
 
-extern const byte buttonPins[4] = { 2, 3, 4, 5 };
+// Debouncea varten muuttuja.
+volatile uint32_t viimeisinKeskeytys = 0;
 
-void initButtonsAndButtonInterrupts(void)
-{
-    pinMode(buttonPins[0], INPUT_PULLUP);
-    pinMode(buttonPins[1], INPUT_PULLUP);
-    pinMode(buttonPins[2], INPUT_PULLUP);
-    pinMode(buttonPins[3], INPUT_PULLUP);
-    // keskeytysten asetukset
+// Tulostus aliohjelma. Tulostetaan serial monitorille mitä nappia on painettu. Tämä poistetaan lopullisesta Speden Spelistä.
+void tulostaNapinPainallus(uint8_t nappi) {
+  Serial.print("Nappia ");
+  Serial.print(nappi);
+  Serial.println(" painettu");
 }
 
+void initButtonsAndButtonInterrupts(void) {
+  
+  
+  for (int i = firstPin; i < lastPin; i++) {
+    pinMode(i, INPUT_PULLUP);
+  }
+  
+  // Pin Change Interrupt Portille D.
+  PCICR |= 0b00000100;
+  
+  // Valitaan pinnit D2-D5 käyttöön keskeytykselle.
+  PCMSK2 |= 0b00111100;
+}
 
-ISR(PCINT2_vect)
-{
-    if(digitalRead(2) == LOW)
-        buttonNumber = 0;
+// Keskeytyspalvelija pinneille D2-D5.
+ISR(PCINT2_vect) {
+  uint32_t nyt = millis();
 
-    if(digitalRead(3) == LOW)
-        buttonNumber = 1;
+// Ohjelmallinen debounce. Jos uusi keskeytys tulee alle 150 ms sisällä edellisestä, sitä ei huomioida.
 
-    if(digitalRead(4) == LOW)
-        buttonNumber = 2;
+  if (nyt - viimeisinKeskeytys < 150) {
+    return;
+  }
+  viimeisinKeskeytys = nyt;
 
-    if(digitalRead(5) == LOW)
-        buttonNumber = 3;
+  if (digitalRead(buttonPins[0]) == LOW) {  // Jos nappia 2 painaa:
+    tulostaNapinPainallus(2); // Kutsutaan tulostus aliohjelmaa.
+    buttonNumber = 0;
+  }
+
+  else if (digitalRead(buttonPins[1]) == LOW) {
+    tulostaNapinPainallus(3);
+    buttonNumber = 1;
+  }
+
+  else if (digitalRead(buttonPins[2]) == LOW) {
+    tulostaNapinPainallus(4);
+    buttonNumber = 2;
+  }
+
+  else if (digitalRead(buttonPins[3]) == LOW) {
+    tulostaNapinPainallus(5);
+    buttonNumber = 3;
+  }
 }

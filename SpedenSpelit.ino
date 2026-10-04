@@ -9,30 +9,35 @@ volatile int buttonNumber = -1;           // for buttons interrupt handler
 volatile bool newTimerInterrupt = false;  // for timer interrupt handler
 bool showingSequence = false;
 
-
+bool sleep = false;
+unsigned long idleTime = 0;
 bool gameOver;
 byte sequence[100];
 int gameIndex = 0;
 int score = 0;
 byte playerIndex;
 
+
 void setup() {
   Serial.begin(9600);
   initializeLeds();
+  initializeDisplay();
   initButtonsAndButtonInterrupts();
+  initializeTimer();
+  idleTime = millis();
+
   randomSeed(analogRead(A0));
 }
 
-unsigned long previousTime = 0;
 
 void loop()
 {
   if(gameOver)
   {
     if(digitalRead(buttonPins[1]) == LOW &&
-        digitalRead(buttonPins[2]) == LOW)
-    {
-      startGame();
+        digitalRead(buttonPins[2]) == LOW){
+            startGame();
+            idleTime = millis();
     }
   }
 
@@ -44,22 +49,17 @@ void loop()
        digitalRead(buttonPins[3]) == LOW)
     {
         startGame();
+        idleTime = millis();
     }
 }
 if(buttonNumber >= 0 && showingSequence && !gameOver) //pelaajan painalluksia tarkistetaan vain sekvenssin pyöriessä
     {
+        idleTime = millis();
         checkGame(buttonNumber);
         buttonNumber = -1; //tyhjennetään painikemuuttuja seuraavalle painallukselle
     }
 
-    // Timerin simulointi R4:llä
-    if(millis() - previousTime >= 1000)
-    {
-        previousTime = millis();
-        newTimerInterrupt = true;
-    }
 
-    // Tämä vastaa myöhemmin TIMER1-keskeytystä
 if(newTimerInterrupt)
 {
     newTimerInterrupt = false;
@@ -67,10 +67,12 @@ if(newTimerInterrupt)
     if(showingSequence)
     {
         setLed(sequence[gameIndex]);
-        delay(300);
-        clearAllLeds();
 
         gameIndex++;
+        if(gameIndex > 0 && gameIndex % 10 == 0){
+        OCR1A = (OCR1A * 9) / 10; //kokonaisluku tarkempi kuin double mikrokontrollerilla
+    }
+
         if(gameIndex >= 100)
         {
             playerIndex = 0;
@@ -78,23 +80,34 @@ if(newTimerInterrupt)
         }
     }
 }
+// virransäästö, 20 sekuntia ilman inputtia sammuttaa ledit
+if(!sleep && millis() - idleTime >= 20000){
+    sleep = true;
+    clearAllLeds();
+}
 }
 
 
 void initializeTimer(void)
 {
-	// see requirements for the function from SpedenSpelit.h
+    cli(); // keskeytykset pois
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1 = 0;
+
+    // 16 MHz / 1024 = 15625 Hz
+    OCR1A = 15624; // 1 sekunti
+    TCCR1B |= (1 << WGM12); // CTC mode
+    TCCR1B |= (1 << CS12) | (1 << CS10); // prescaler 1024
+    TIMSK1 |= (1 << OCIE1A); // compare match A interrupt
+    sei(); // keskeytykset päälle
 }
 ISR(TIMER1_COMPA_vect)
 {
-  /*
-  Communicate to loop() that it's time to make new random number.
-  Increase timer interrupt rate after 10 interrupts.
-  */
-  
+    newTimerInterrupt = true;
 }
 
-void createSequence() //luo satunnaisen sekvenssin
+void createSequence() // luo satunnaisen sekvenssin
 {
     for(byte i = 0; i < 100; i++)
     {
@@ -106,7 +119,6 @@ void startGame()
 {
   initializeGame();
   showingSequence = true;
-  gameIndex = 0;
 }
 
 void initializeGame()
@@ -117,6 +129,9 @@ void initializeGame()
     gameOver = false;
     score = 0;
     buttonNumber = -1;
+    newTimerInterrupt = false;
+    OCR1A = 15624; // 1 sekunti
+
 }
 
 void checkGame(byte button)
@@ -127,15 +142,13 @@ void checkGame(byte button)
         showingSequence = false; //sekvenssin näyttäminen pysähtyy, peliä ei voi jatkaa
         return; // pelaaja yritti arvata, peli pääättyy
     }
-    if(button == sequence[playerIndex])
-    {
+    if(button == sequence[playerIndex]){
         playerIndex++;
         score++;
+        showResult(score);
         Serial.print("Pisteet: "); //print testaukseen
         Serial.println(score);
-    }
-    else
-    {
+    }else{
         Serial.print("Peli päättyi. Pisteet: ");
         Serial.println(score);
         gameOver = true;

@@ -39,6 +39,6 @@ void ledShow1(void);
   int rounds: This parameter determines how many times 0,1,2,3 sequence
               is shown. 
 */
-void ledShow2(void);
+void ledShow2(byte rounds);
 
 #endif
