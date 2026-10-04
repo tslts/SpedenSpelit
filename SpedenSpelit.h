@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+extern unsigned long idleTime;
 /*
   initializeTimer() subroutine intializes Arduino Timer1 module to
   give interrupts at rate 1Hz
@@ -41,7 +42,7 @@ void checkGame(byte);
   function and enables Timer1 interrupts to start
   the Game.
 */
-void startTheGame(void);
+void startGame(void);
 void createSequence(void);
 void startGame(void);
 
