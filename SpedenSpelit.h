@@ -44,6 +44,6 @@ void checkGame(byte);
 */
 void startGame(void);
 void createSequence(void);
-void startGame(void);
+
 
 #endif

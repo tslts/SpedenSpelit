@@ -76,3 +76,8 @@ void showResult(byte number)
 // See requirements for this function from display.h
 }
 
+void clearDisplay(void)
+{
+  writeByte(0x00, false);
+  writeByte(0x00, true);
+}

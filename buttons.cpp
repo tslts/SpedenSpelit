@@ -16,7 +16,7 @@ void tulostaNapinPainallus(uint8_t nappi) {
 void initButtonsAndButtonInterrupts(void) {
   
   
-  for (int i = firstPin; i < lastPin; i++) {
+  for (int i = firstPin; i <= lastPin; i++) {
     pinMode(i, INPUT_PULLUP);
   }
   
@@ -33,28 +33,28 @@ ISR(PCINT2_vect) {
 
 // Ohjelmallinen debounce. Jos uusi keskeytys tulee alle 150 ms sisällä edellisestä, sitä ei huomioida.
 
-  if (nyt - viimeisinKeskeytys < 150) {
+  if (nyt - viimeisinKeskeytys < 300) {
     return;
   }
   viimeisinKeskeytys = nyt;
 
   if (digitalRead(buttonPins[0]) == LOW) {  // Jos nappia 2 painaa:
-    tulostaNapinPainallus(2); // Kutsutaan tulostus aliohjelmaa.
+    tulostaNapinPainallus(1); // Kutsutaan tulostus aliohjelmaa.
     buttonNumber = 0;
   }
 
   else if (digitalRead(buttonPins[1]) == LOW) {
-    tulostaNapinPainallus(3);
+    tulostaNapinPainallus(2);
     buttonNumber = 1;
   }
 
   else if (digitalRead(buttonPins[2]) == LOW) {
-    tulostaNapinPainallus(4);
+    tulostaNapinPainallus(3);
     buttonNumber = 2;
   }
 
   else if (digitalRead(buttonPins[3]) == LOW) {
-    tulostaNapinPainallus(5);
+    tulostaNapinPainallus(4);
     buttonNumber = 3;
   }
 }

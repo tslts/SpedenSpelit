@@ -33,11 +33,6 @@ void ledShow1(void);
 /*
   show2(int) subroutine shows leds 0,1,2,3,0,1,2,3,.... with increasing
   changing rate. And when top change speed has been reached
-
-    Parameters:
-  
-  int rounds: This parameter determines how many times 0,1,2,3 sequence
-              is shown. 
 */
 void ledShow2(byte rounds);
 

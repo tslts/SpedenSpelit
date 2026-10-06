@@ -45,8 +45,14 @@ void setAllLeds() {
 
 void ledShow1() {
 
-  laskuri++; 
-  delay(200); 
+uint32_t nytLed1 = millis();
+
+
+if(nytLed1 - viimeisinAika > 200)
+{
+viimeisinAika = nytLed1;
+laskuri++;
+}
 
   if((laskuri % 4) > 1) { digitalWrite(A2, LOW); } else { digitalWrite(A2, HIGH); }
 
@@ -56,42 +62,49 @@ void ledShow1() {
 
   if((laskuri % 32) > 15) { digitalWrite(A5, LOW); } else { digitalWrite(A5, HIGH); } 
 
-  delay(200); 
 
 }
 
-// Viive säädetty kolmelle toistolle.
-void ledShow2(byte rounds) {
+void ledShow2(byte rounds)
+{
+int viive = 500;
 
-  uint32_t nyt = millis();
+for(byte r = 0; r < rounds; r++)
+{
+// Nopeutuva valoshow
+while(viive >= 100)
+{
+// LED0
+clearAllLeds();
+delay(100);
+digitalWrite(ledPins[0], LOW);
+delay(viive);
 
-  // Aloitetaan loop, jos on kulunut vähintään 500 ms.
-  if (nyt - viimeisinAika >= viive) {
-    
-    viimeisinAika = nyt;
+// LED0 + LED1
+clearAllLeds();
+digitalWrite(ledPins[0], LOW);
+digitalWrite(ledPins[1], LOW);
+delay(viive);
 
-    if (vaihe < 4) {
+// LED0 + LED1 + LED2
+clearAllLeds();
+digitalWrite(ledPins[0], LOW);
+digitalWrite(ledPins[1], LOW);
+digitalWrite(ledPins[2], LOW);
+delay(viive);
 
-      // Sytytetään yksi LED kerrallaan.
-      digitalWrite(ledPins[vaihe], LOW);
-      vaihe++;
+// LED0 + LED1 + LED2 + LED3
+clearAllLeds();
+digitalWrite(ledPins[0], LOW);
+digitalWrite(ledPins[1], LOW);
+digitalWrite(ledPins[2], LOW);
+digitalWrite(ledPins[3], LOW);
+delay(viive);
 
-    } else {
+viive -= 50;
+}
 
-      // Kun kaikki LEDit palaa, sammutetaan ne.
-      for (uint8_t i = 0; i < 4; i++) {
-        digitalWrite(ledPins[i], HIGH);
-      }
-    
-      // Vähennetään viivettä.
-      viive -= 150;
-      vaihe = 0;
-      toisto++;
-
-      if (toisto >= rounds) {
-        toisto = 0;
-        viive = 500;
-      }
-    }
-  }
+viive = 500;
+}
+clearAllLeds();
 }
