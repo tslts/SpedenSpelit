@@ -7,17 +7,17 @@ As the game progresses, the sequence becomes faster, requiring increasingly bett
 
 The project provides hands-on experience with microcontroller programming, interrupts, timers, digital output control, and modular software design.
 
-- Features
-- Four LEDs for displaying the sequence.
-- Four buttons for player input.
-- Two-digit seven-segment display for showing the score.
-- Randomly generated LED sequences.
-- Timer-based sequence control.
-- Increasing game speed as the player progresses.
-- Software-based button debouncing.
-- Power-saving mode activated after 20 seconds of inactivity.
-- Serial output for monitoring game events.
-- Hardware Components
+Features
+Four LEDs for displaying the sequence.
+Four buttons for player input.
+Two-digit seven-segment display for showing the score.
+Randomly generated LED sequences.
+Timer-based sequence control.
+Increasing game speed as the player progresses.
+Software-based button debouncing.
+Power-saving mode activated after 20 seconds of inactivity.
+Serial output for monitoring game events.
+Hardware Components
 Component	Purpose
 Arduino-compatible microcontroller	Controls the game
 4 LEDs	Display the game sequence
@@ -29,31 +29,31 @@ Resistors and jumper wires	Electrical connections
 Note: The display is controlled using shift registers. The exact wiring depends on the hardware being used.
 
 Pin Configuration
-
+LEDs
 LED	Arduino Pin
-LED 0	      A2
-LED 1	      A3
-LED 2	      A4
-LED 3	      A5
+LED 0	A2
+LED 1	A3
+LED 2	A4
+LED 3	A5
 
 The LEDs use active-LOW logic: LOW turns an LED on, while HIGH turns it off.
 
 Buttons
 Button	Arduino Pin
-Button  0	      D2
-Button  1	      D3
-Button  2	      D4
-Button  3	      D5
+Button 0	D2
+Button 1	D3
+Button 2	D4
+Button 3	D5
 
 The buttons use the INPUT_PULLUP configuration. Pressing a button connects the pin to ground, causing its input value to become LOW.
 
 Button state changes are detected using a pin change interrupt on Port D.
 
 Seven-Segment Display
-Signal	      Arduino Pin
-Reset	        D12
-Shift Clock	  D11
-Latch Clock	  D10
+Signal	Arduino Pin
+Reset	D12
+Shift Clock	D11
+Latch Clock	D10
 Output Enable	D9
 Serial Input	D8
 
@@ -70,6 +70,7 @@ Increasing difficulty: The sequence playback becomes faster as the game progress
 Game over: An incorrect button press or a premature guess ends the game.
 Restart: The player can start a new round.
 
+The sequence is stored in an array with a maximum capacity of 200 entries.
 
 Software Architecture
 
@@ -96,27 +97,51 @@ initializeTimer() – Configures the Timer1 hardware timer.
 createSequence() – Generates a random sequence.
 startGame() – Starts a new round.
 checkGame() – Checks whether the player's button press is correct.
-
-
 Technical Implementation
-
 Timer and Interrupts
+
 The LED sequence is controlled using the Timer1 hardware timer, suitable for ATmega-based Arduino boards. The timer operates in CTC mode with a prescaler of 1024.
+
 At a clock frequency of 16 MHz, the initial comparison value for a one-second interval is set to OCR1A = 15624.
+
 The timer interrupt service routine sets the newTimerInterrupt flag. The main game logic then processes this flag inside the loop() function.
 
 Button Debouncing
+
 Mechanical button bounce is filtered using a software-based approach. A 300-millisecond interval is applied between accepted interrupts, and additional interrupts within that interval are ignored.
 
 Power-Saving Mode
+
 If the player does not interact with the game for 20 seconds, the program enters power-saving mode and turns off the LEDs and display segments.
+
 This mode switches off the LEDs and display in software but does not put the Arduino itself into a hardware sleep state.
 
+Getting Started
+Clone the repository to your computer.
+Open the Arduino project in the Arduino IDE.
+Make sure all required source files and header files are included.
+Connect the LEDs, buttons, and display according to the pin configuration above.
+Select the correct Arduino board and port.
+Compile the program and upload it to the microcontroller.
+Open the Serial Monitor at 9600 baud to observe game events.
+Serial Monitor Messages
 
 The program prints messages to the Serial Monitor to indicate the current game state, for example:
+
 PELI ALKAA! – The game starts.
 PELI PÄÄTTYI! – The game ends after an incorrect button press.
 PELI PÄÄTTYI ENNAKOINTIIN! – The game ends because the player pressed a button too early.
 VIRRANSÄÄSTÖTILA: PÄÄLLÄ – Power-saving mode is activated.
 
 These messages help monitor the game and troubleshoot potential issues.
+
+Possible Future Improvements
+Saving high scores to EEPROM memory.
+Adding separate start and restart buttons.
+Allowing the player to select the difficulty level.
+Adding sound effects.
+Implementing a hardware sleep mode for improved power efficiency.
+Adding tests for the display and game logic.
+License
+
+Add an appropriate license to the project. For example, the MIT License allows others to use, modify, and distribute the code under its terms.
