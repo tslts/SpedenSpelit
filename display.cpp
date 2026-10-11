@@ -7,7 +7,7 @@ const int latchClockPin = 10;
 const int outEnablePin = 9;
 const int serialInputPin = 8;
 
-const uint8_t digits[] = {
+const uint8_t digits[] = {  // Lukujen segmenttikoodit
   0b00111111, // 0
   0b00000110, // 1
   0b01011011, // 2
@@ -21,63 +21,51 @@ const uint8_t digits[] = {
 };
 
 
-void initializeDisplay(void)
-{
-  Serial.println("Initializing displays"); // Määritetään outputit
-  pinMode(resetPin, OUTPUT);
+void initializeDisplay(void) {
+
+  pinMode(resetPin, OUTPUT);  // Output määritys
   pinMode(shiftClockPin, OUTPUT);
   pinMode(latchClockPin, OUTPUT);
   pinMode(outEnablePin, OUTPUT);
   pinMode(serialInputPin, OUTPUT);
 
-  digitalWrite(resetPin, HIGH);           // Määritetään vakiot
+  digitalWrite(resetPin, HIGH); // Vakioiden määritys
   digitalWrite(shiftClockPin, LOW);
   digitalWrite(latchClockPin, LOW);
   digitalWrite(outEnablePin, LOW);
   digitalWrite(serialInputPin, LOW);
-// See requirements for this function from display.h
 }
 
+void writeByte(uint8_t bits, bool last) {
 
-void writeByte(uint8_t bits,bool last)
-{
-  for(int i = 7; i >= 0; i--)
-  {
-    uint8_t bitValue = (bits >> i) & 0x01;
-    digitalWrite(serialInputPin, bitValue);
-
-    digitalWrite(shiftClockPin, HIGH);
+  for(int i = 7; i >= 0; i--) { 
+    uint8_t bitValue = (bits >> i) & 1; // Poimitaan bitti kerrallaan
+    digitalWrite(serialInputPin, bitValue); // Bitti dataväylään
+    digitalWrite(shiftClockPin, HIGH);  // Kellopulssi: Bitti rekisteriin
     digitalWrite(shiftClockPin, LOW);
   }
 
-  if (last)
-  {
+  if(last) {  // Kaikki tavut lähetetty: latch-pulssi
     digitalWrite(latchClockPin, HIGH);
     digitalWrite(latchClockPin, LOW);
   }
-// See requirements for this function from display.h
 }
 
+void writeHighAndLowNumber(uint8_t tens, uint8_t ones) {
 
-void writeHighAndLowNumber(uint8_t tens,uint8_t ones)
-{
-  writeByte(digits[tens], false);
-  writeByte(digits[ones], true);
-// See requirements for this function from display.h
+  writeByte(digits[tens], false); // Kymmenet
+  writeByte(digits[ones], true);  // Ykköset (latch)
 }
 
+void showResult(byte number) {
 
-void showResult(byte number)
-{
-  uint8_t tens = number / 10;
-  uint8_t ones = number % 10;
-
+  uint8_t tens = number / 10; // Kymmenet
+  uint8_t ones = number % 10; // Ykköset
   writeHighAndLowNumber(tens, ones);
-// See requirements for this function from display.h
 }
 
-void clearDisplay(void)
-{
-  writeByte(0x00, false);
-  writeByte(0x00, true);
+void clearDisplay(void) { // Virransäästötila: Segmenttien sammutus
+
+  writeByte(0, false);
+  writeByte(0, true);
 }
