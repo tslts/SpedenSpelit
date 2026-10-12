@@ -168,6 +168,7 @@ The program prints messages to the Serial Monitor to indicate the current game s
 
 These messages help monitor the game and troubleshoot potential issues.
 
+<video src="./media/SpedenSpeli-Ryhmä6.mp4" controls width="600"></video>
 
 <img src="./pic/wiring.jpg" alt="wiring" width="600">
 
