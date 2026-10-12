@@ -168,8 +168,8 @@ The program prints messages to the Serial Monitor to indicate the current game s
 
 These messages help monitor the game and troubleshoot potential issues.
 
-<img src="./pic/Vuokaavio.jpg" alt="flowchart" width="600">
+<img src="./pic/Vuokaavio.jpg" alt="flowchart" width="700">
 
-<img src="./pic/wiring.jpg" alt="wiring" width="600">
+<img src="./pic/wiring.jpg" alt="wiring" width="700">
 
-<img src="./pic/wiringlive.jpg" alt="wirelive" width="600">
+<img src="./pic/wiringlive.jpg" alt="wirelive" width="700">
